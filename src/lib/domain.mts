@@ -19,7 +19,7 @@ import {
     isCallExpression,
     primaryConstructorOf,
     primaryConstructorParametersOf
-} from './utils.js'
+} from './utils.mts'
 
 export class KtContext {
     readonly baseDir: string

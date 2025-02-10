@@ -166,7 +166,7 @@ export function functionHasAnnotation(fun: SyntaxNode, annotation: string): bool
     return modifiers.some(m => m.text.includes(annotation))
 }
 
-export const distinct = <T>(array: T[], keyFn: (item: T) => any) => {
+export const distinct = <T,>(array: T[], keyFn: (item: T) => any) => {
     const seen = new Set()
     return array.filter(item => {
         const key = keyFn(item)

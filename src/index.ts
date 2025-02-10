@@ -2,12 +2,13 @@
 
 import {readFileSync} from 'fs'
 import {program} from 'commander'
-import {KtClass, KtContext} from './lib/domain.js';
+import {KtClass, KtContext} from "./lib/domain.mts";
 import {search, select} from '@inquirer/prompts';
 import assert from 'assert';
-import {distinct} from './lib/utils'
-import {describeFLow, describeFlowPrompt, writeTests, writeTestsPrompt} from './lib/llm';
-import {terminal} from 'terminal-kit'
+import {distinct} from './lib/utils.mts'
+import {describeFLow, describeFlowPrompt, writeTests, writeTestsPrompt} from './lib/llm.mts';
+import terminalKit from 'terminal-kit';
+const {terminal} = terminalKit;
 
 const {version} = JSON.parse(readFileSync('./package.json', 'utf-8'))
 let ktContext: KtContext | undefined = undefined;

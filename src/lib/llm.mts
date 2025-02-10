@@ -1,5 +1,5 @@
 import {ChatOpenAI} from '@langchain/openai'
-import type {KtFun} from './domain.js'
+import type {KtFun} from './domain.mts'
 import fs from 'fs'
 
 const gpt = new ChatOpenAI({
