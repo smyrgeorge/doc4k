@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import {readFileSync} from 'fs'
 import {program} from 'commander'
 import {KtClass, KtContext} from "./lib/domain.mts";
@@ -43,7 +41,7 @@ program.parse(process.argv)
 
 console.log(`Welcome to @Doc4k :: v${version}`)
 
-async function main() {
+export async function run() {
     // noinspection InfiniteLoopJS
     while (true) {
         let _file = await search({
@@ -143,5 +141,3 @@ async function main() {
         spinner.animate(false)
     }
 }
-
-main().catch(console.error)
