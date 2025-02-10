@@ -1,0 +1,33 @@
+{
+  "name": "doc4k",
+  "version": "0.0.1",
+  "description": "",
+  "license": "MIT",
+  "author": "Yorgos Smyrnaios",
+  "type": "commonjs",
+  "main": "index.ts",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "build": "tsc",
+    "dist": "node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^7.3.1",
+    "@inquirer/search": "^3.0.8",
+    "@langchain/core": "^0.3.37",
+    "@langchain/ollama": "^0.1.5",
+    "@langchain/openai": "^0.4.2",
+    "commander": "^13.1.0",
+    "inquirer": "^12.4.1",
+    "langchain": "^0.3.15",
+    "terminal-kit": "^3.1.2",
+    "tree-sitter-kotlin": "^0.3.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.1",
+    "@types/terminal-kit": "^2.5.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  }
+}
