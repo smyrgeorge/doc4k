@@ -1,6 +1,6 @@
 # Doc4k
 
-`Doc4k` is an interactive CLI tool designed for analyzing large Kotlin projects. It provides features to
+`Doc4k` is an interactive CLI tool designed for analyzing large Kotlin projects using AI. It provides features to
 support tracing execution flows, summarizing code, and generating test cases effectively for Kotlin codebases.
 
 This project leverages the Tree-sitter parser to efficiently and quickly parse large Kotlin codebases.
