@@ -53,4 +53,4 @@ OPENAI_API_KEY=<MY_SECRET_KEY>
 
 ## Demo
 
-[![asciicast](https://asciinema.org/a/ME4yaD7fdbNqZHYppY8JcYwDB.svg)](https://asciinema.org/a/ME4yaD7fdbNqZHYppY8JcYwDB)
+[![asciicast](https://asciinema.org/a/SZVhuWbNzLw2E989gKU1jI6S6.svg)](https://asciinema.org/a/SZVhuWbNzLw2E989gKU1jI6S6)
