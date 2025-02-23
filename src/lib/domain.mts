@@ -69,8 +69,7 @@ export class KtContext {
         return {file, aClass: aClassFile}
     }
 
-    findClass(aClass: KtClass, type?: string): { file: KtFile, aClass: KtClass } | undefined {
-        type = type ?? ''
+    findClass(aClass: KtClass, type: string): { file: KtFile, aClass: KtClass } | undefined {
         const i = aClass.file.imports.find(i => i.endsWith(type))
         const p = i ? i.replace(`.${type}`, '') : aClass.packageName
         const f = this.files.find(f => f.packageName === p && f.classes.find(c => c.name === type))
