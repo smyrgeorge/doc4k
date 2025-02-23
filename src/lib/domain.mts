@@ -69,19 +69,15 @@ export class KtContext {
         return {file, aClass: aClassFile}
     }
 
-    findClass(aClass: string | KtClass, type?: string): { file: KtFile, aClass: KtClass } | undefined {
+    findClass(aClass: KtClass, type?: string): { file: KtFile, aClass: KtClass } | undefined {
         type = type ?? ''
-        if (typeof aClass === 'string') return this.findClassByName(aClass)
-        else {
-            const i = aClass.file.imports.find(i => i.endsWith(type))
-            if (!i) return this.findClassByName(type)
-            const p = i.replace(`.${type}`, '')
-            const file = this.files.find(f => f.packageName === p && f.classes.find(c => c.name === type))
-            if (!file) return this.findClassByName(type)
-            const aClassFile = file.classes.find(c => c.name === type)
-            assert(aClassFile)
-            return {file, aClass: aClassFile}
-        }
+        const i = aClass.file.imports.find(i => i.endsWith(type))
+        const p = i ? i.replace(`.${type}`, '') : aClass.packageName
+        const f = this.files.find(f => f.packageName === p && f.classes.find(c => c.name === type))
+        if (!f) return this.findClassByName(type) // Fallback (search with class name only).
+        const aClassFile = f.classes.find(c => c.name === type)
+        assert(aClassFile)
+        return {file: f, aClass: aClassFile}
     }
 
     flowOf(fun: KtFun, aClass: KtClass): KtFun[] {
@@ -94,32 +90,32 @@ export class KtContext {
         return flow
     }
 
-    private _call(aClass: KtClass, fun: KtFun, targetClass: KtClass, funName: string, flow: KtFun[]) {
-        const targetFun: KtFun[] = targetClass.functions.filter(f => f.name === funName)
-        targetFun.forEach(f => {
-            console.log(`(${aClass.name}.${fun.name})`, 'CALL:', `${targetClass.name}.${f.name}`)
-            flow.push(f)
-            this._flowOf(f, targetClass, flow)
+    private _call(aClass: KtClass, fun: KtFun, targetClass: KtClass, targetFunName: string, flow: KtFun[]) {
+        const targetFunctions: KtFun[] = targetClass.functions.filter(f => f.name === targetFunName)
+        targetFunctions.forEach(targetFun => {
+            console.log(`(${aClass.name}.${fun.name})`, 'CALL:', `${targetClass.name}.${targetFun.name}`)
+            flow.push(targetFun)
+            this._flowOf(targetFun, targetClass, flow)
         })
     }
 
     private _navigation(s: SyntaxNode, fun: KtFun, aClass: KtClass, flow: KtFun[]) {
         const expr = s.firstChild?.text
         const navigation = expr?.split('.') ?? []
-        const funName = navigation[1].split('(')[0]
+        const targetFunName = navigation[1].split('(')[0]
 
         const classProperty = aClass.properties.find(p => p.name === navigation[0])
         if (classProperty) {
             const targetClass = this.findClass(aClass, classProperty.type)?.aClass
             if (targetClass) {
-                this._call(aClass, fun, targetClass, funName, flow)
+                this._call(aClass, fun, targetClass, targetFunName, flow)
                 return
             }
         }
 
         const targetClass = this.findClass(aClass, navigation[0])?.aClass
         if (targetClass) {
-            this._call(aClass, fun, targetClass, funName, flow)
+            this._call(aClass, fun, targetClass, targetFunName, flow)
             return
         }
     }
@@ -137,7 +133,6 @@ export class KtContext {
             const targetFunName = identifierOf(s)
             if (!targetFunName) return // Case imported static fun.
             if (targetFunName === fun.name) return // Recursive calls.
-
             this._call(aClass, fun, aClass, targetFunName, flow)
         })
     }
