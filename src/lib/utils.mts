@@ -80,7 +80,8 @@ export function assertIsCallExpression(node: SyntaxNode): void {
 export function importsOf(sourceFile: SyntaxNode): SyntaxNode[] {
     assertIsSourceFile(sourceFile)
     const importList = sourceFile.children.find(c => isImportList(c))
-    if (importList) return importList.children; else return [];
+    if (importList) return importList.children
+    else return []
 }
 
 export function childrenClassesOf(node: SyntaxNode): [SyntaxNode, string | undefined][] {
@@ -145,14 +146,14 @@ export function functionBodyOf(fun: SyntaxNode): SyntaxNode | undefined {
 export function allCallStatementsOf(node: SyntaxNode, acc: SyntaxNode[] = []): SyntaxNode[] {
     if (isCallExpression(node)) acc.push(node)
     node.children.forEach(c => allCallStatementsOf(c, acc))
-    return acc;
+    return acc
 }
 
 export function findRecursively(grammarType: string, node: SyntaxNode): SyntaxNode | undefined {
     if (node.grammarType === grammarType) return node
     for (const c of node.children) {
         const found = findRecursively(grammarType, c)
-        if (found) return found;
+        if (found) return found
     }
 }
 
