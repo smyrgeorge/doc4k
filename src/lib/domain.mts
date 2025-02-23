@@ -61,13 +61,27 @@ export class KtContext {
         return ktFile
     }
 
-    findClass(aClass: string): { file: KtFile, aClass: KtClass } | undefined {
-        // TODO: check for package also
+    findClassByName(aClass: string): { file: KtFile, aClass: KtClass } | undefined {
         const file = this.files.find(f => f.classes.find(c => c.name === aClass))
         if (!file) return undefined
         const aClassFile = file.classes.find(c => c.name === aClass)
         assert(aClassFile)
         return {file, aClass: aClassFile}
+    }
+
+    findClass(aClass: string | KtClass, type?: string): { file: KtFile, aClass: KtClass } | undefined {
+        type = type ?? ''
+        if (typeof aClass === 'string') return this.findClassByName(aClass)
+        else {
+            const i = aClass.file.imports.find(i => i.endsWith(type))
+            if (!i) return this.findClassByName(type)
+            const p = i.replace(`.${type}`, '')
+            const file = this.files.find(f => f.packageName === p && f.classes.find(c => c.name === type))
+            if (!file) return this.findClassByName(type)
+            const aClassFile = file.classes.find(c => c.name === type)
+            assert(aClassFile)
+            return {file, aClass: aClassFile}
+        }
     }
 
     flowOf(fun: KtFun, aClass: KtClass): KtFun[] {
@@ -80,44 +94,34 @@ export class KtContext {
         return flow
     }
 
-    private _call(aClass: KtClass, fun: KtFun, targetClass: KtClass, targetFun: KtFun, flow: KtFun[]) {
-        console.log(`(${aClass.name}.${fun.name})`, 'CALL:', `${targetClass.name}.${targetFun.name}`)
-        flow.push(targetFun)
-        this._flowOf(targetFun, targetClass, flow)
+    private _call(aClass: KtClass, fun: KtFun, targetClass: KtClass, funName: string, flow: KtFun[]) {
+        const targetFun: KtFun[] = targetClass.functions.filter(f => f.name === funName)
+        targetFun.forEach(f => {
+            console.log(`(${aClass.name}.${fun.name})`, 'CALL:', `${targetClass.name}.${f.name}`)
+            flow.push(f)
+            this._flowOf(f, targetClass, flow)
+        })
     }
 
     private _navigation(s: SyntaxNode, fun: KtFun, aClass: KtClass, flow: KtFun[]) {
         const expr = s.firstChild?.text
         const navigation = expr?.split('.') ?? []
         const funName = navigation[1].split('(')[0]
-        console.log(`(${aClass.name}.${fun.name})`, 'NAVIGATION:', `${expr}`)
 
         const classProperty = aClass.properties.find(p => p.name === navigation[0])
         if (classProperty) {
-            const targetClass = this.findClass(classProperty.type)?.aClass
+            const targetClass = this.findClass(aClass, classProperty.type)?.aClass
             if (targetClass) {
-                const targetFun: KtFun[] = targetClass.functions.filter(f => f.name === funName)
-                if (targetFun.length) {
-                    targetFun.forEach(f => this._call(aClass, fun, targetClass, f, flow))
-                    return
-                }
-                console.warn(`(${aClass.name}.${fun.name})`, 'NAVIGATION: [NOT FOUND]', `${targetClass.name}::${funName}`)
+                this._call(aClass, fun, targetClass, funName, flow)
                 return
             }
         }
 
-        const targetClass = this.findClass(navigation[0])?.aClass
+        const targetClass = this.findClass(aClass, navigation[0])?.aClass
         if (targetClass) {
-            const targetFun: KtFun[] = targetClass.functions.filter(f => f.name === funName)
-            if (targetFun.length) {
-                targetFun.forEach(f => this._call(aClass, fun, targetClass, f, flow))
-                return
-            }
-            console.warn(`(${aClass.name}.${fun.name})`, 'NAVIGATION: [NOT FOUND]', `${targetClass.name}::${funName}`)
+            this._call(aClass, fun, targetClass, funName, flow)
             return
         }
-
-        console.warn(`(${aClass.name}.${fun.name})`, 'NAVIGATION: [NOT FOUND]', expr)
     }
 
     private _flowOf(fun: KtFun, aClass: KtClass, flow: KtFun[]) {
@@ -134,13 +138,7 @@ export class KtContext {
             if (!targetFunName) return // Case imported static fun.
             if (targetFunName === fun.name) return // Recursive calls.
 
-            const classFun: KtFun[] = aClass.functions.filter(f => f.name === targetFunName)
-            if (classFun.length) {
-                classFun.forEach(f => this._call(aClass, fun, aClass, f, flow))
-                return
-            }
-
-            console.warn(`(${aClass.name}.${fun.name})`, 'CALL: [NOT FOUND]', targetFunName)
+            this._call(aClass, fun, aClass, targetFunName, flow)
         })
     }
 }
@@ -150,7 +148,7 @@ export class KtFile {
     readonly root: SyntaxNode
     readonly filePath: string
     readonly packageName: string
-    readonly imports: SyntaxNode[]
+    readonly imports: String[]
     readonly classes: KtClass[]
     readonly functions: KtFun[]
 
@@ -160,7 +158,7 @@ export class KtFile {
         assertIsSourceFile(this.root)
         this.filePath = filePath
         this.packageName = findRecursively('package_header', this.root)?.text?.replace('package ', '') ?? ''
-        this.imports = importsOf(this.root)
+        this.imports = importsOf(this.root).map(i => i.text.replace('import ', ''))
         this.classes = childrenClassesOf(this.root).map(c => new KtClass(c[0], this, this.packageName, c[1]))
         this.functions = childrenFunctionsOf(this.root).map(f => new KtFun(f[0], this, f[1], undefined))
     }
