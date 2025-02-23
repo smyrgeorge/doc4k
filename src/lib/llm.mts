@@ -1,6 +1,7 @@
 import {ChatOpenAI} from '@langchain/openai'
 import type {KtFun} from './domain.mts'
 import fs from 'fs'
+import {highlight} from "cli-highlight";
 
 const gpt = new ChatOpenAI({
     // model: 'gpt-4o',
@@ -42,7 +43,7 @@ export async function describeFLow(fun: KtFun, flow: KtFun[]) {
     console.log(`=== Content has been also written to ${out} ===`)
     console.log('=== GPT RESPONSE ===')
     console.log(res)
-    console.log(content)
+    console.log(highlight(content, {language: 'markdown'}))
 }
 
 export const writeTestsPrompt =
@@ -68,5 +69,5 @@ export async function writeTests(fun: KtFun, flow: KtFun[]) {
     console.log(`=== Content has been also written to ${out} ===`)
     console.log('=== GPT RESPONSE ===')
     console.log(res)
-    console.log(content)
+    console.log(highlight(content, {language: 'markdown'}))
 }

@@ -200,7 +200,7 @@ export class KtClass {
     docs(): string {
         const type = this.isObject ? 'object' : 'class'
         const doc = this.documentation ? `${this.documentation}` : ''
-        return `\n${this.packageName}\n\n${doc}\n${type} ${this.name} { ... }`
+        return `\npackage ${this.packageName}\n\n${doc}\n${type} ${this.name} { ... }`
     }
 }
 
@@ -235,7 +235,7 @@ export class KtFun {
         const ident = this.class ? '    ' : ''
         const doc = this.documentation ? `${ident}${this.documentation}\n` : ''
         const code = `${ident}${this.root.text}`
-        return `${doc}${code}`.split('\n').map(l => l.replace(ident, '')).join('\n')
+        return `\n${doc}${code}`.split('\n').map(l => l.replace(ident, '')).join('\n')
     }
 }
 

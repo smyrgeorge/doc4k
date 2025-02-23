@@ -1,15 +1,17 @@
 import {readFileSync} from 'fs'
 import {program} from 'commander'
-import {KtClass, KtContext} from "./lib/domain.mts";
-import {search, select} from '@inquirer/prompts';
-import assert from 'assert';
+import {KtClass, KtContext} from "./lib/domain.mts"
+import {search, select} from '@inquirer/prompts'
+import assert from 'assert'
 import {distinct} from './lib/utils.mts'
-import {describeFLow, describeFlowPrompt, writeTests, writeTestsPrompt} from './lib/llm.mts';
-import terminalKit from 'terminal-kit';
-const {terminal} = terminalKit;
+import {describeFLow, describeFlowPrompt, writeTests, writeTestsPrompt} from './lib/llm.mts'
+import terminalKit from 'terminal-kit'
+import {highlight} from "cli-highlight"
+
+const {terminal} = terminalKit
 
 const {version} = JSON.parse(readFileSync('./package.json', 'utf-8'))
-let ktContext: KtContext | undefined = undefined;
+let ktContext: KtContext | undefined = undefined
 let classes: KtClass[] = []
 
 program
@@ -54,7 +56,7 @@ export async function run() {
                         return {
                             name: `${c.packageName}.${c.name}`,
                             value: `${c.file.filePath}::${c.name}`,
-                            description: c.docs()
+                            description: highlight(c.docs(), {language: 'kotlin'})
                         }
                     }).slice(0, 20)
                 }
@@ -64,7 +66,7 @@ export async function run() {
                         return {
                             name: `${c.packageName}.${c.name}`,
                             value: `${c.file.filePath}::${c.name}`,
-                            description: c.docs()
+                            description: highlight(c.docs(), {language: 'kotlin'})
                         }
                     }).slice(0, 20)
             }
@@ -84,7 +86,7 @@ export async function run() {
                     return ktClass.functions.map(f => {
                         return {
                             value: `${ktClass.name}::${f.name}`,
-                            description: `\n${f.documentation ?? 'No documentation available.'}\n`
+                            description: highlight(f.text(), {language: 'kotlin'})
                         }
                     }).slice(0, 50)
                 }
@@ -93,7 +95,7 @@ export async function run() {
                     .map(f => {
                         return {
                             value: `${ktClass.name}::${f.name}`,
-                            description: `\n${f.documentation ?? 'No documentation available.'}\n`
+                            description: highlight(f.text(), {language: 'kotlin'})
                         }
                     }).slice(0, 50)
             }
